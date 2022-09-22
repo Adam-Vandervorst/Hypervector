@@ -28,7 +28,8 @@ object HyperVectors:
 
     inline def majority[Tup <: Tuple](inline hvs: Tup): HyperVector =
       inline if constValue[Tuple.Size[Tup] % 2 == 0] then
-        majority(ConstantTuple.prepend(hvs)(random))
+        val r = random // random should only be computed once
+        majority(ConstantTuple.prepend(hvs)(r))
       else
         SizedVector.tabulate{ i =>
           var p = 0
