@@ -1,5 +1,6 @@
 import munit.FunSuite
 
+import be.adamv.macroloop.ConstantTuple
 import hv.*
 
 class GrandmotherExample extends FunSuite:
@@ -28,37 +29,21 @@ class GrandmotherExample extends FunSuite:
     val sy = rel_object(rel) xor y
     HyperVector.majority(sx, sy)
 
-  // symbols
-  val person_x1 = HyperVector.random
-  val person_y1 = HyperVector.random
-  val person_z1 = HyperVector.random
-
-  val person_x2 = HyperVector.random
-  val person_y2 = HyperVector.random
-  val person_z2 = HyperVector.random
-
-  val person_x3 = HyperVector.random
-  val person_y3 = HyperVector.random
-  val person_z3 = HyperVector.random
-
   // our rule, read `xor` as "implied by" and `HyperVector.majority` as "and"
   // note this is applied to multiple "datapoints" ...
-  val mxy1 = apply_rel(mother_of)(person_x1, person_y1)
-  val fyz1 = apply_rel(father_of)(person_y1, person_z1)
-  val gxz1 = apply_rel(grandmother_of)(person_x1, person_z1)
-  val grandmother_rule1 = gxz1 xor HyperVector.majority(mxy1, fyz1)
+  val (rule1: HyperVector, rule2: HyperVector, rule3: HyperVector) = ConstantTuple.fillUnrolled(3){
+    val person_x = HyperVector.random
+    val person_y = HyperVector.random
+    val person_z = HyperVector.random
 
-  val mxy2 = apply_rel(mother_of)(person_x2, person_y2)
-  val fyz2 = apply_rel(father_of)(person_y2, person_z2)
-  val gxz2 = apply_rel(grandmother_of)(person_x2, person_z2)
-  val grandmother_rule2 = gxz2 xor HyperVector.majority(mxy2, fyz2)
+    val mxy = apply_rel(mother_of)(person_x, person_y)
+    val fyz = apply_rel(father_of)(person_y, person_z)
+    val gxz = apply_rel(grandmother_of)(person_x, person_z)
 
-  val mxy3 = apply_rel(mother_of)(person_x2, person_y2)
-  val fyz3 = apply_rel(father_of)(person_y2, person_z2)
-  val gxz3 = apply_rel(grandmother_of)(person_x2, person_z2)
-  val grandmother_rule3 = gxz3 xor HyperVector.majority(mxy3, fyz3)
+    gxz xor HyperVector.majority(mxy, fyz)
+  }
   // ... and averaged out for higher accuracy
-  val grandmother_rule = HyperVector.majority(grandmother_rule1, grandmother_rule2, grandmother_rule3)
+  val grandmother_rule = HyperVector.majority(rule1, rule2, rule3)
 
   test("apply grandmother_rule") {
     val anna = HyperVector.random
