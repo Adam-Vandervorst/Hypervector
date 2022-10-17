@@ -12,14 +12,34 @@ object Permutations:
       SizedVector.tabulate(identity)
 
     def random: Permutation =
-      SizedVector.wrap(rand.shuffle(ident.data).toArray)
+      val a = ident.data.clone()
+      var i = hyperVectorSize - 1
+      while i > 0 do
+        val j = rand.nextInt(i + 1)
+        val x = a(j)
+        a(j) = a(i)
+        a(i) = x
+        i -= 1
+      SizedVector.wrap(a)
 
     def shift(k: Int): Permutation =
       SizedVector.tabulate(i => (i + k) % hyperVectorSize)
 
     extension (p: Permutation)
+      inline def raw: SizedVector[HyperVectorSize, Int] = p
+
       def apply(hv: HyperVector): HyperVector =
-        HyperVector.fromRaw(SizedVector.tabulate(i => hv(p(i))))
+        val sv = Array.fill[Int](256)(0)
+        var i = 0
+        while i < 256 do
+          var k = 0
+          while k < 32 do
+            val target = p(i*32 + k)
+            if hv.at(i*32 + k) then
+              sv(target/32) |= 1 << (target % 32)
+            k += 1
+          i += 1
+        HyperVectors.HyperVector.fromRaw(SizedVector.from(sv))
 
       def inverse: Permutation =
         val inv: Array[Int] = SizedArrayIndex.ofSize[HyperVectorSize, Int]
@@ -31,5 +51,5 @@ object Permutations:
         SizedVector.wrap(inv)
 
       def composed(q: Permutation): Permutation =
-        SizedVector.tabulate(i => q(p(i)))
+        SizedVector.tabulate(i => p(q(i)))
 export Permutations.*
