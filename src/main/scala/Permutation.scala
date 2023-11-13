@@ -25,6 +25,11 @@ object Permutations:
     def shift(k: Int): Permutation =
       SizedVector.tabulate(i => (i + k) % hyperVectorSize)
 
+    def bijection(f: Int => Int): Permutation =
+      SizedVector.tabulate(f)
+
+    def fromRaw(sv: SizedVector[HyperVectorSize, Int]): Permutation = sv
+
     extension (p: Permutation)
       inline def raw: SizedVector[HyperVectorSize, Int] = p
 
